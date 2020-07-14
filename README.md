@@ -3,7 +3,7 @@
 The development environment consists the required technologies and how to install it in your local host (MacOS) in order to start developing extraordinary:
 - serverless applications with **knative**
 - micro-services with **istio**
-- kubernetes resources with **kin**
+- kubernetes resources with **kind**
 
 ## Requirements
 1. You need to have ```Docker``` and ```kubectl``` installed on your host machine.
