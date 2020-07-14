@@ -1,0 +1,65 @@
+# a cluster with 1 control-plane node and 3 workers
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+networking:
+  # WARNING: It is _strongly_ recommended that you keep this the default
+  # (127.0.0.1) for security reasons. However it is possible to change this.
+  apiServerAddress: "127.0.0.1"
+  # By default the API server listens on a random open port.
+  # You may choose a specific port but probably don't need to in most cases.
+  # Using a random port makes it easier to spin up multiple clusters.
+  apiServerPort: 6443
+  # You can configure the subnet used for pod IPs by setting
+  podSubnet: "10.244.0.0/16"
+  # You can configure the Kubernetes service subnet used for service IPs by setting
+  serviceSubnet: "10.96.0.0/12"
+containerdConfigPatches: 
+- |-
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."registry.${dns_domaine}:${reg_port}"]
+    endpoint = ["http://registry.${dns_domaine}:${reg_port}"]
+nodes:
+# The API-server and other control plane components will be
+# on the control-plane node.
+- role: control-plane
+  # add a mount from /path/to/my/files on the host to /files on the node
+  extraMounts:
+  - hostPath: ~/Documents/kindpercistence/
+    containerPath: /kindpercistence
+  # Custom node label by using node-labels in the kubeadm InitConfiguration, 
+  # to be used by the ingress controller nodeSelector.
+  kubeadmConfigPatches:
+  - |
+    apiVersion: kubeadm.k8s.io/v1beta2
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
+        authorization-mode: "AlwaysAllow"
+  extraPortMappings:
+  # port forward 80 on the host to 80 on this node
+  - containerPort: 80
+    hostPort: 80
+    # optional: set the protocol to one of TCP, UDP, SCTP.
+    # TCP is the default
+    protocol: TCP
+  # port forward 443 on the host to 443 on this node
+  - containerPort: 443
+    hostPort: 443
+    # optional: set the protocol to one of TCP, UDP, SCTP.
+    # TCP is the default
+    protocol: TCP
+- role: worker
+  # add a mount from /path/to/my/files on the host to /files on the node
+  extraMounts:
+  - hostPath: ~/Documents/kindpercistence/
+    containerPath: /kindpercistence
+- role: worker
+  # add a mount from /path/to/my/files on the host to /files on the node
+  extraMounts:
+  - hostPath: ~/Documents/kindpercistence/
+    containerPath: /kindpercistence
+- role: worker
+  # add a mount from /path/to/my/files on the host to /files on the node
+  extraMounts:
+  - hostPath: ~/Documents/kindpercistence/
+    containerPath: /kindpercistence

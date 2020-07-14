@@ -1,0 +1,68 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: dev-app
+  labels:
+    app: dev
+spec:
+  containers:
+  - name: dev-app
+    image: registry.local-developement.com:5000/http-echo
+    args:
+    - "-text=dev"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: dev-service
+spec:
+  selector:
+    app: dev
+  ports:
+  # Default port used by the image
+  - port: 5678
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: ops-app
+  labels:
+    app: ops
+spec:
+  containers:
+  - name: ops-app
+    image: registry.local-developement.com:5000/http-echo
+    args:
+    - "-text=ops"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: ops-service
+spec:
+  selector:
+    app: ops
+  ports:
+  # Default port used by the image
+  - port: 5678
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: app-ingress
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: app.local-developement.com
+    http:
+      paths:
+      - path: /dev
+        backend:
+          serviceName: dev-service
+          servicePort: 5678
+      - path: /ops
+        backend:
+          serviceName: ops-service
+          servicePort: 5678
+---
